@@ -1,27 +1,58 @@
 import * as yup from 'yup';
-// import onChange from 'on-change';
+import onChange from 'on-change';
+import i18next from 'i18next';
 import view from './view.js';
+import ru from './locales/ru.js';
+// import en from './locales/en.js';
 
-const yupScheme = yup.object({ url: yup.string().required().url() });
+const yupScheme = yup.object().shape({ url: yup.string().url() });
 
 export default () => {
-  const state = {
+  const defaultLanguage = 'ru';
+
+  const instanceState = {
+    appLng: defaultLanguage,
     rssForm: {
-      state: null,
+      status: 'filling',
       error: null,
     },
-    rssUrl: {
-      url: null,
-      isValid: false,
-    },
   };
-  const rssForm = document.querySelector('.rss-form');
-  const rssInput = rssForm.querySelector('input');
-  rssInput.addEventListener('input', (e) => {
-    console.log(e.target.value);
-  });
-  console.log(rssForm);
-  console.log(view());
-  console.log(state);
-  yupScheme.validate({ url: 'https://lorem-rss.hexlet.app/feed' }).then((res) => console.log(res));
+
+  const domElements = {
+    appName: document.querySelector('.app-name'),
+    lead: document.querySelector('.lead'),
+    rssForm: document.querySelector('.rss-form'),
+    feedback: document.querySelector('.feedback'),
+    rssInput: document.querySelector('#url-input'),
+    rssInputPlaceholder: document.querySelector('[for="url-input"]'),
+    sendBtn: document.querySelector('.btn-lg'),
+    example: document.querySelector('.example'),
+  };
+
+  const i18nInstance = i18next.createInstance();
+  i18nInstance.init({
+    lng: defaultLanguage,
+    debug: false,
+    resources: {
+      ru,
+    },
+  })
+    .then(() => {
+      const state = onChange(instanceState, view(instanceState, i18nInstance, domElements));
+
+      domElements.rssForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const url = domElements.rssForm.elements.url.value;
+        yupScheme.validate({ url })
+          .then(() => {
+            console.log('to view.js');
+            state.rssForm.status = 'sending';
+          })
+          .catch((err) => {
+            state.rssForm.error = 400; // 400 Bad Request RFC 7231
+
+            console.log(err.errors);
+          });
+      });
+    });
 };
