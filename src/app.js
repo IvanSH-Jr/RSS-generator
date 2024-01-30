@@ -1,9 +1,11 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
 import i18next from 'i18next';
+// import axios from 'axios';
+
 import view from './view.js';
 import ru from './locales/ru.js';
-// import en from './locales/en.js';
+import en from './locales/en.js';
 
 const yupScheme = yup.object().shape({ url: yup.string().url() });
 
@@ -14,7 +16,7 @@ export default () => {
     appLng: defaultLanguage,
     rssForm: {
       status: 'filling',
-      error: null,
+      error: null, // invalidURL, invalidRss, URLduplicate
     },
   };
 
@@ -35,6 +37,7 @@ export default () => {
     debug: false,
     resources: {
       ru,
+      en,
     },
   })
     .then(() => {
@@ -44,14 +47,13 @@ export default () => {
         e.preventDefault();
         const url = domElements.rssForm.elements.url.value;
         yupScheme.validate({ url })
-          .then(() => {
-            console.log('to view.js');
+          .then((res) => {
+            console.log(res);
             state.rssForm.status = 'sending';
-          })
+          }) // finished?
           .catch((err) => {
-            state.rssForm.error = 400; // 400 Bad Request RFC 7231
-
-            console.log(err.errors);
+            state.rssForm.error = err.message;
+            state.rssForm.status = 'failed';
           });
       });
     });
