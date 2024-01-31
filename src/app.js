@@ -1,13 +1,15 @@
 import * as yup from 'yup';
 import onChange from 'on-change';
 import i18next from 'i18next';
-// import axios from 'axios';
+import axios from 'axios';
 
 import view from './view.js';
 import ru from './locales/ru.js';
 import en from './locales/en.js';
+import rssParser from './rssParser.js';
 
 const yupScheme = yup.object().shape({ url: yup.string().url() });
+const allOrigin = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
 
 export default () => {
   const defaultLanguage = 'ru';
@@ -47,11 +49,18 @@ export default () => {
         e.preventDefault();
         const url = domElements.rssForm.elements.url.value;
         yupScheme.validate({ url })
+          .then(() => {
+            state.rssForm.status = 'sending';
+            const allOriginUrl = allOrigin(url);
+            const posts = axios.get(allOriginUrl);
+            return posts;
+          })
           .then((res) => {
             console.log(res);
-            state.rssForm.status = 'sending';
-          }) // finished?
+            rssParser(res.data.contents);
+          })
           .catch((err) => {
+            console.log(err);
             state.rssForm.error = err.message;
             state.rssForm.status = 'failed';
           });

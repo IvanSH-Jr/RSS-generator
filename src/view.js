@@ -1,4 +1,4 @@
-const getNestedVal = (path, state) => path.split('.').reduce((p, c) => p[c], state);
+// const getNestedVal = (path, state) => path.split('.').reduce((p, c) => p[c], state);
 
 const errorHandler = (i18nInstance, domElements, errValue) => {
   const {
@@ -23,7 +23,7 @@ const formStatusHandler = (i18nInstance, domElements, value) => {
 };
 
 export default (state, i18nInstance, domElements) => (path, value) => {
-  console.log(getNestedVal(path, state));
+  console.log(state);
   switch (path) {
     case 'rssForm.error': errorHandler(i18nInstance, domElements, value);
       break;
