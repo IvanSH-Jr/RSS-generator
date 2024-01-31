@@ -15,5 +15,6 @@ export default {
     errUrl: 'Ссылка должна быть валидным URL',
     'Network Error': 'Ошибка сети',
     rssSucceed: 'RSS успешно загружен',
+    errorRss: 'Ресурс не содержит валидный RSS',
   },
 };

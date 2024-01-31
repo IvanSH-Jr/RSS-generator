@@ -57,7 +57,8 @@ export default () => {
           })
           .then((res) => {
             console.log(res);
-            rssParser(res.data.contents);
+            const feeds = rssParser(res.data.contents);
+            console.log(feeds);
           })
           .catch((err) => {
             console.log(err);
