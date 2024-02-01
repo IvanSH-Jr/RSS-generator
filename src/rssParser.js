@@ -3,7 +3,7 @@ export default (data) => {
   const doc = parser.parseFromString(data, 'application/xml');
   const rssError = doc.querySelector('parsererror');
   if (rssError) {
-    throw new Error(`errorRss`);
+    throw new Error('errorRss');
   }
 
   const feedTitle = doc.querySelector('title').textContent;
@@ -20,7 +20,7 @@ export default (data) => {
     const postDescription = post.querySelector('description').textContent;
     const postLink = post.querySelector('link').textContent;
     posts.push({ title: postTitle, description: postDescription, link: postLink });
-  })
+  });
 
   return { feed, posts };
 };

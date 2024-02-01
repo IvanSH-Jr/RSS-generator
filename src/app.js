@@ -17,9 +17,13 @@ export default () => {
   const instanceState = {
     appLng: defaultLanguage,
     rssForm: {
-      status: 'filling',
-      error: null, // invalidURL, invalidRss, URLduplicate
+      status: 'filling', // sending finished failed
+      error: null, // all errors with form
     },
+    rssList: [],
+    feeds: [],
+    postList: [],
+    lastUrl: null,
   };
 
   const domElements = {
@@ -31,6 +35,8 @@ export default () => {
     rssInputPlaceholder: document.querySelector('[for="url-input"]'),
     sendBtn: document.querySelector('.btn-lg'),
     example: document.querySelector('.example'),
+    feeds: document.querySelector('.feeds'),
+    posts: document.querySelector('.posts'),
   };
 
   const i18nInstance = i18next.createInstance();
@@ -47,21 +53,26 @@ export default () => {
 
       domElements.rssForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const url = domElements.rssForm.elements.url.value;
+        const url = domElements.rssForm.elements.url.value.trim();
         yupScheme.validate({ url })
           .then(() => {
             state.rssForm.status = 'sending';
+            state.lastUrl = url;
             const allOriginUrl = allOrigin(url);
-            const posts = axios.get(allOriginUrl);
-            return posts;
+            const rssData = axios.get(allOriginUrl);
+            return rssData;
           })
-          .then((res) => {
-            console.log(res);
-            const feeds = rssParser(res.data.contents);
-            console.log(feeds);
+          .then((rss) => {
+            const content = rssParser(rss.data.contents);
+            state.rssForm.status = 'finished';
+            return content;
+          })
+          .then(({ feed, posts }) => {
+            state.rssForm.error = null;
+            state.feeds.push(feed);
+            state.postList.push(...posts);
           })
           .catch((err) => {
-            console.log(err);
             state.rssForm.error = err.message;
             state.rssForm.status = 'failed';
           });

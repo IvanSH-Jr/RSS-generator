@@ -9,12 +9,19 @@ setLocale({
 export default {
   translation: {
     appName: 'RSS агрегатор',
-    rssInputPlaceholde: 'Ссылка RSS',
+    rssForm: {
+      inputPlaceholder: 'Ссылка RSS',
+      succeed: 'RSS успешно загружен',
+      error: {
+        invalid: 'Ресурс не содержит валидный RSS',
+        duplicate: 'RSS уже существует',
+        errUrl: 'Ссылка должна быть валидным URL',
+        'Network Error': 'Ошибка сети',
+      },
+    },
     lead: 'Начните читать RSS сегодня! Это легко, это красиво.',
     example: 'Пример: https://ru.hexlet.io/lessons.rss',
-    errUrl: 'Ссылка должна быть валидным URL',
-    'Network Error': 'Ошибка сети',
-    rssSucceed: 'RSS успешно загружен',
-    errorRss: 'Ресурс не содержит валидный RSS',
+    feeds: 'Фиды',
+    postList: 'Посты',
   },
 };
