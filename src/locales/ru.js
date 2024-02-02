@@ -17,7 +17,7 @@ export default {
         duplicate: 'RSS уже существует',
         errUrl: 'Ссылка должна быть валидным URL',
         'Network Error': 'Ошибка сети',
-      },
+      }, 
     },
     lead: 'Начните читать RSS сегодня! Это легко, это красиво.',
     example: 'Пример: https://ru.hexlet.io/lessons.rss',

@@ -3,23 +3,25 @@
 const errorHandler = (state, i18nInstance, domElements) => {
   const { feedback, rssInput } = domElements;
   const { error } = state.rssForm;
-  if (!error) {
-    const rssSucceed = i18nInstance.t('rssForm.succeed');
-    feedback.textContent = rssSucceed;
+  if (error) {
+    const errorText = i18nInstance.t(`rssForm.error.${error}`);
+    feedback.textContent = errorText;
+    feedback.classList.add('text-danger');
+    feedback.classList.remove('text-success');
+    rssInput.classList.add('is-invalid');
+  }
+};
+
+const formStatusHandler = (i18nInstance, domElements, status) => {
+  const { feedback, rssInput } = domElements;
+  if (status === 'succeed') {
+    const succeed = i18nInstance.t(`rssForm.${status}`);
+    feedback.textContent = succeed;
     feedback.classList.remove('text-danger');
     feedback.classList.add('text-success');
     rssInput.classList.remove('is-invalid');
     return;
   }
-  const errorText = i18nInstance.t(`rssForm.error.${error}`);
-  feedback.textContent = errorText;
-  rssInput.classList.add('is-invalid');
-};
-
-const formStatusHandler = (i18nInstance, domElements, value) => {
-  console.log(i18nInstance);
-  console.log(domElements);
-  console.log(value);
 };
 /* eslint no-param-reassign: 0 */
 const cardBody = (container, name) => {
@@ -87,12 +89,13 @@ const postsRender = (name, domElements, state) => {
   });
 };
 
-export default (state, i18nInstance, domElements) => (path) => {
-  // console.log(path)
+export default (state, i18nInstance, domElements) => (path, value) => {
+  console.log(state)
+  console.log(path)
   switch (path) {
     case 'rssForm.error': errorHandler(state, i18nInstance, domElements);
       break;
-    case 'rssForm.status': formStatusHandler(i18nInstance, domElements);
+    case 'rssForm.status': formStatusHandler(i18nInstance, domElements, value);
       break;
     case 'feeds': feedsRender(i18nInstance.t(path), domElements, state);
       break;

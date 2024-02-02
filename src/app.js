@@ -64,15 +64,17 @@ export default () => {
           })
           .then((rss) => {
             const content = rssParser(rss.data.contents);
-            state.rssForm.status = 'finished';
+            state.rssForm.status = 'succeed';
             return content;
           })
           .then(({ feed, posts }) => {
             state.rssForm.error = null;
             state.feeds.push(feed);
             state.postList.push(...posts);
+            state.rssForm.status = 'filling';
           })
           .catch((err) => {
+            console.log(err.message)
             state.rssForm.error = err.message;
             state.rssForm.status = 'failed';
           });
