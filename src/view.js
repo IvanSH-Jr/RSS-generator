@@ -20,7 +20,6 @@ const formStatusHandler = (i18nInstance, domElements, status) => {
     feedback.classList.remove('text-danger');
     feedback.classList.add('text-success');
     rssInput.classList.remove('is-invalid');
-    return;
   }
 };
 /* eslint no-param-reassign: 0 */
@@ -90,8 +89,8 @@ const postsRender = (name, domElements, state) => {
 };
 
 export default (state, i18nInstance, domElements) => (path, value) => {
-  console.log(state)
-  console.log(path)
+  console.log(state);
+  console.log(path);
   switch (path) {
     case 'rssForm.error': errorHandler(state, i18nInstance, domElements);
       break;
@@ -100,8 +99,6 @@ export default (state, i18nInstance, domElements) => (path, value) => {
     case 'feeds': feedsRender(i18nInstance.t(path), domElements, state);
       break;
     case 'postList': postsRender(i18nInstance.t(path), domElements, state);
-      break;
-    case 'lastUrl': console.log('awdawdaw');
       break;
     default:
       throw new Error(`Unknown path of app state: '${path}'!`);
