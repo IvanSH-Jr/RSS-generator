@@ -16,10 +16,11 @@ export default () => {
   const instanceState = {
     appLng: defaultLanguage,
     rssForm: {
-      status: 'filling', // sending finished failed
+      status: 'filling', // sending succeed finished failed
       error: null, // all errors with form
     },
     feeds: [],
+    lastFeedId: 0,
     postList: [],
   };
 
@@ -55,6 +56,7 @@ export default () => {
         e.preventDefault();
         const url = domElements.rssForm.elements.url.value.trim();
         const urlShape = urlValidator(state.feeds);
+        const feedId = state.lastFeedId + 1;
         urlShape.validate({ url })
           .then(() => {
             state.rssForm.status = 'sending';
@@ -64,20 +66,26 @@ export default () => {
           })
           .then((rss) => {
             const content = rssParser(rss.data.contents);
-            state.rssForm.status = 'succeed';
+            state.rssForm.status = 'sent';
             return content;
           })
           .then(({ feed, posts }) => {
-            state.rssForm.error = null;
             const { title, description } = feed;
-            state.feeds.push({ title, description, url });
+            state.lastFeedId = feedId;
+            state.feeds.push({
+              id: feedId, title, description, url,
+            });
             state.postList = [...state.postList, ...posts];
+            state.rssForm.status = 'finished';
+          })
+          .then(() => {
+            state.rssForm.error = null;
             state.rssForm.status = 'filling';
           })
           .catch((err) => {
             console.log(err.message);
             state.rssForm.error = err.message;
-            state.rssForm.status = 'failed';
+            state.rssForm.status = 'error';
           });
       });
     });

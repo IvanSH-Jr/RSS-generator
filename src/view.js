@@ -6,20 +6,43 @@ const errorHandler = (state, i18nInstance, domElements) => {
   if (error) {
     const errorText = i18nInstance.t(`rssForm.error.${error}`);
     feedback.textContent = errorText;
-    feedback.classList.add('text-danger');
-    feedback.classList.remove('text-success');
+    feedback.classList.replace('text-success', 'text-danger');
     rssInput.classList.add('is-invalid');
   }
 };
 
-const formStatusHandler = (i18nInstance, domElements, status) => {
-  const { feedback, rssInput } = domElements;
-  if (status === 'succeed') {
-    const succeed = i18nInstance.t(`rssForm.${status}`);
-    feedback.textContent = succeed;
-    feedback.classList.remove('text-danger');
-    feedback.classList.add('text-success');
-    rssInput.classList.remove('is-invalid');
+const formStatusHandler = (state, i18nInstance, domElements, status) => {
+  const {
+    feedback, rssInput, sendBtn, rssForm,
+  } = domElements;
+  switch (status) {
+    case 'sending':
+      feedback.textContent = i18nInstance.t(`rssForm.${status}`);
+      feedback.classList.replace('text-danger', 'loading');
+      feedback.classList.replace('text-success', 'loading');
+      sendBtn.setAttribute('disabled', '');
+      break;
+    case 'sent':
+      feedback.textContent = i18nInstance.t(`rssForm.${status}`);
+      feedback.classList.replace('loading', 'text-danger');
+      sendBtn.removeAttribute('disabled');
+      break;
+    case 'filling':
+    case 'finished':
+      feedback.textContent = i18nInstance.t('rssForm.finished');
+      feedback.classList.replace('text-danger', 'text-success');
+      feedback.classList.replace('loading', 'text-success');
+      rssInput.classList.remove('is-invalid');
+      rssForm.reset();
+      rssInput.focus();
+      break;
+    case 'error':
+      feedback.textContent = i18nInstance.t(`rssForm.error.${state.rssForm.error}`);
+      feedback.classList.replace('loading', 'text-danger');
+      feedback.classList.replace('text-success', 'text-danger');
+      break;
+    default:
+      throw new Error(`Unknown status:${status}`);
   }
 };
 /* eslint no-param-reassign: 0 */
@@ -88,17 +111,18 @@ const postsRender = (name, domElements, state) => {
   });
 };
 
-export default (state, i18nInstance, domElements) => (path, value) => {
+export default (state, i18nInstance, domElements) => (path, value, prev) => {
   console.log(state);
-  console.log(path);
   switch (path) {
     case 'rssForm.error': errorHandler(state, i18nInstance, domElements);
       break;
-    case 'rssForm.status': formStatusHandler(i18nInstance, domElements, value);
+    case 'rssForm.status': formStatusHandler(state, i18nInstance, domElements, value);
       break;
     case 'feeds': feedsRender(i18nInstance.t(path), domElements, state);
       break;
     case 'postList': postsRender(i18nInstance.t(path), domElements, state);
+      break;
+    case 'lastFeedId': console.log(`lastFeedId = ${prev}, currentId = ${value}`);
       break;
     default:
       throw new Error(`Unknown path of app state: '${path}'!`);

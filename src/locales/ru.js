@@ -11,7 +11,9 @@ export default {
     appName: 'RSS агрегатор',
     rssForm: {
       inputPlaceholder: 'Ссылка RSS',
-      succeed: 'RSS успешно загружен',
+      finished: 'RSS успешно загружен',
+      sending: 'Запрос отправляется',
+      sent: 'RSS загружается',
       error: {
         invalid: 'Ресурс не содержит валидный RSS',
         duplicate: 'RSS уже существует',
