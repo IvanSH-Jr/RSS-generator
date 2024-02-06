@@ -124,6 +124,8 @@ export default (state, i18nInstance, domElements) => (path, value, prev) => {
       break;
     case 'lastFeedId': console.log(`lastFeedId = ${prev}, currentId = ${value}`);
       break;
+    case 'lastPostId': console.log(`lastPostdId = ${prev}, currentId = ${value}`);
+      break;
     default:
       throw new Error(`Unknown path of app state: '${path}'!`);
   }

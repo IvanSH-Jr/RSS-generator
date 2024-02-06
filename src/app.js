@@ -22,6 +22,7 @@ export default () => {
     feeds: [],
     lastFeedId: 0,
     postList: [],
+    lastPostId: 0,
   };
 
   const domElements = {
@@ -58,7 +59,6 @@ export default () => {
       const downloadContent = (url) => {
         const allOriginUrl = allOrigin(url);
         const rssData = axios.get(allOriginUrl);
-        const feedId = state.lastFeedId + 1;
         return rssData
           .then((rss) => {
             const content = rssParser(rss.data.contents);
@@ -67,6 +67,7 @@ export default () => {
           })
           .then(({ feed, posts }) => {
             const { title, description } = feed;
+            const feedId = state.lastFeedId + 1;
             const hasFeed = state.feeds.filter((feedItem) => feedItem.title === title);
             if (hasFeed.length === 0) {
               state.lastFeedId = feedId;
@@ -76,10 +77,18 @@ export default () => {
             }
             if (state.postList.length) {
               const newPost = posts
-                .filter((post) => state.postList.every((item) => item.title !== post.title));
-              state.postList.unshift(...newPost);
+                .filter((post) => state.postList.every((item) => item.title !== post.title))
+              newPost.forEach((post) => {
+                state.lastPostId = state.lastPostId + 1;
+                post.id = state.lastPostId;
+              })
+              state.postList.unshift(...newPost,);
               return;
             }
+            posts.forEach((post) => {
+              state.lastPostId = state.lastPostId + 1;
+              post.id = state.lastPostId;
+            })
             state.postList.push(...posts);
             state.rssForm.status = 'finished';
             domElements.readBtn = document.querySelectorAll('.btn-sm');
