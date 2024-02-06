@@ -48,18 +48,42 @@ export default () => {
   })
     .then(() => {
       const state = onChange(instanceState, view(instanceState, i18nInstance, domElements));
+
       const urlValidator = (feeds) => {
         const arrayOfUrls = feeds.map(({ url }) => url);
         return yup.object().shape({ url: yup.string().url().notOneOf(arrayOfUrls, 'duplicate') });
       };
+
+      const downloadContent = (url) => {
+        const allOriginUrl = allOrigin(url);
+        const rssData = axios.get(allOriginUrl);
+        const feedId = state.lastFeedId + 1;
+        rssData
+          .then((rss) => {
+            const content = rssParser(rss.data.contents);
+            state.rssForm.status = 'sent';
+            return content;
+          })
+          .then(({ feed, posts }) => {
+            const { title, description } = feed;
+            state.lastFeedId = feedId;
+            state.feeds.push({
+              id: feedId, title, description, url,
+            });
+            state.postList = [...state.postList, ...posts];
+            state.rssForm.status = 'finished';
+          })
+          .finally(() => setTimeout(downloadContent, 5000, url));
+      };
+
       domElements.rssForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const url = domElements.rssForm.elements.url.value.trim();
         const urlShape = urlValidator(state.feeds);
-        const feedId = state.lastFeedId + 1;
         urlShape.validate({ url })
           .then(() => {
             state.rssForm.status = 'sending';
+            downloadContent(url);
             const allOriginUrl = allOrigin(url);
             const rssData = axios.get(allOriginUrl);
             return rssData;
