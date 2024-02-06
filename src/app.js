@@ -35,6 +35,7 @@ export default () => {
     example: document.querySelector('.example'),
     feeds: document.querySelector('.feeds'),
     posts: document.querySelector('.posts'),
+    modal: document.querySelectorAll('.modal'),
   };
 
   const i18nInstance = i18next.createInstance();
@@ -81,6 +82,10 @@ export default () => {
             }
             state.postList.push(...posts);
             state.rssForm.status = 'finished';
+            domElements.readBtn = document.querySelectorAll('.btn-sm');
+            domElements.readBtn.forEach((readBtn) => {
+              readBtn.addEventListener('click', readBtnHandler);
+            });
           })
           .then(() => {
             state.rssForm.error = null;
@@ -91,6 +96,10 @@ export default () => {
             state.rssForm.status = 'error';
           })
           .finally(() => setTimeout(downloadContent, 5000, url));
+      };
+
+      const readBtnHandler = (btn) => {
+        console.log(btn.currentTarget)
       };
 
       domElements.rssForm.addEventListener('submit', (e) => {
@@ -108,5 +117,6 @@ export default () => {
             state.rssForm.status = 'error';
           });
       });
+
     });
 };
