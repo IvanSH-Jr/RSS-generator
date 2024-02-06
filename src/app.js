@@ -66,16 +66,29 @@ export default () => {
           })
           .then(({ feed, posts }) => {
             const { title, description } = feed;
-            state.lastFeedId = feedId;
-            state.feeds.push({
-              id: feedId, title, description, url,
-            });
-            state.postList = [...state.postList, ...posts];
+            const hasFeed = state.feeds.filter((feedItem) => feedItem.title === title);
+            if (hasFeed.length === 0) {
+              state.lastFeedId = feedId;
+              state.feeds.push({
+                id: feedId, title, description, url,
+              });
+            }
+            if (state.postList.length) {
+              const newPost = posts
+                .filter((post) => state.postList.every((item) => item.title !== post.title));
+              state.postList.unshift(...newPost);
+              return;
+            }
+            state.postList.push(...posts);
             state.rssForm.status = 'finished';
           })
           .then(() => {
             state.rssForm.error = null;
             state.rssForm.status = 'filling';
+          })
+          .catch((err) => {
+            state.rssForm.error = err.message;
+            state.rssForm.status = 'error';
           })
           .finally(() => setTimeout(downloadContent, 5000, url));
       };
