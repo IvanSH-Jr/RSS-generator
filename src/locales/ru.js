@@ -25,5 +25,6 @@ export default {
     example: 'Пример: https://ru.hexlet.io/lessons.rss',
     feeds: 'Фиды',
     postList: 'Посты',
+    readBtn: 'Просмотр',
   },
 };

@@ -1,5 +1,3 @@
-// const getNestedVal = (path, state) => path.split('.').reduce((p, c) => p[c], state);
-
 const errorHandler = (state, i18nInstance, domElements) => {
   const { feedback, rssInput } = domElements;
   const { error } = state.rssForm;
@@ -81,7 +79,7 @@ const cardBody = (container, name) => {
   card.append(cardName);
   container.append(card);
   container.append(list);
-  return list;
+  return container;
 };
 /* eslint no-param-reassign: 1 */
 const feedsRender = (name, domElements, state) => {
@@ -103,10 +101,14 @@ const feedsRender = (name, domElements, state) => {
   });
 };
 
-const postsRender = (name, domElements, state) => {
+const postsRender = (name, domElements, state, btnName) => {
   const { posts } = domElements;
-  const listContainer = cardBody(posts, name);
-  state.postList.forEach((post) => {
+  if (!posts.hasChildNodes()) {
+    const container = cardBody(posts, name);
+    posts.replaceWith(container);
+  }
+  const listGroup = document.querySelector('.list-group');
+  const list = state.postList.map((post) => {
     const { title, link, id } = post;
     const li = document.createElement('li');
     li.classList.add(
@@ -119,20 +121,23 @@ const postsRender = (name, domElements, state) => {
     );
     const a = document.createElement('a');
     a.textContent = title;
-    a.classList.add('fw-bold');
+    const isVisited = state.checkedPosts.filter((checkedPost) => id === checkedPost.id);
+    const linkClass = isVisited.length ? ['fw-normal', 'link-secondary'] : ['fw-bold'];
     a.href = link;
+    a.classList.add(...linkClass);
     a.setAttribute('data-id', id);
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.classList.add('btn', 'btn-outline-primary', 'btn-sm');
-    btn.textContent = 'Просмотр';
+    btn.textContent = btnName;
     btn.setAttribute('data-id', id);
     btn.setAttribute('data-bs-toggle', 'modal');
     btn.setAttribute('data-bs-target', '#modal');
     li.append(a);
     li.append(btn);
-    listContainer.append(li);
+    return li;
   });
+  listGroup.replaceChildren(...list);
 };
 
 export default (state, i18nInstance, domElements) => (path, value, prev) => {
@@ -143,7 +148,7 @@ export default (state, i18nInstance, domElements) => (path, value, prev) => {
       break;
     case 'feeds': feedsRender(i18nInstance.t(path), domElements, state);
       break;
-    case 'postList': postsRender(i18nInstance.t(path), domElements, state);
+    case 'postList': postsRender(i18nInstance.t(path), domElements, state, i18nInstance.t('readBtn'));
       break;
     case 'lastFeedId': console.log(`lastFeedId = ${prev}, currentId = ${value}`);
       break;
