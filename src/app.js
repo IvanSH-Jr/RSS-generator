@@ -23,6 +23,7 @@ export default () => {
     lastFeedId: 0,
     postList: [],
     lastPostId: 0,
+    checkedPosts: [],
   };
 
   const domElements = {
@@ -36,7 +37,10 @@ export default () => {
     example: document.querySelector('.example'),
     feeds: document.querySelector('.feeds'),
     posts: document.querySelector('.posts'),
-    modal: document.querySelectorAll('.modal'),
+    modal: document.querySelector('.modal'),
+    modalTitle: document.querySelector('.modal-title'),
+    modalBody: document.querySelector('.modal-body'),
+    modalFullArticle: document.querySelector('.full-article'),
   };
 
   const i18nInstance = i18next.createInstance();
@@ -54,6 +58,12 @@ export default () => {
       const urlValidator = (feeds) => {
         const arrayOfUrls = feeds.map(({ url }) => url);
         return yup.object().shape({ url: yup.string().url().notOneOf(arrayOfUrls, 'duplicate') });
+      };
+
+      const readBtnHandler = (btn) => {
+        const postId = Number(btn.currentTarget.dataset.id);
+        const postById = state.postList.filter(({ id }) => id === postId);
+        state.checkedPosts.push(...postById);
       };
 
       const downloadContent = (url) => {
@@ -77,18 +87,26 @@ export default () => {
             }
             if (state.postList.length) {
               const newPost = posts
-                .filter((post) => state.postList.every((item) => item.title !== post.title))
+                .filter((post) => state.postList.every((item) => item.title !== post.title));
               newPost.forEach((post) => {
-                state.lastPostId = state.lastPostId + 1;
+                state.lastPostId += 1;
+                /* eslint no-param-reassign: 0 */
                 post.id = state.lastPostId;
-              })
-              state.postList.unshift(...newPost,);
+                /* eslint no-param-reassign: 1 */
+              });
+              state.postList.unshift(...newPost);
+              domElements.readBtn = document.querySelectorAll('.btn-sm');
+              domElements.readBtn.forEach((readBtn) => {
+                readBtn.addEventListener('click', readBtnHandler);
+              });
               return;
             }
             posts.forEach((post) => {
-              state.lastPostId = state.lastPostId + 1;
+              state.lastPostId += 1;
+              /* eslint no-param-reassign: 0 */
               post.id = state.lastPostId;
-            })
+              /* eslint no-param-reassign: 1 */
+            });
             state.postList.push(...posts);
             state.rssForm.status = 'finished';
             domElements.readBtn = document.querySelectorAll('.btn-sm');
@@ -107,10 +125,6 @@ export default () => {
           .finally(() => setTimeout(downloadContent, 5000, url));
       };
 
-      const readBtnHandler = (btn) => {
-        console.log(btn.currentTarget)
-      };
-
       domElements.rssForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const url = domElements.rssForm.elements.url.value.trim();
@@ -126,6 +140,5 @@ export default () => {
             state.rssForm.status = 'error';
           });
       });
-
     });
 };

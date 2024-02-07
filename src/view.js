@@ -45,6 +45,27 @@ const formStatusHandler = (state, i18nInstance, domElements, status) => {
       throw new Error(`Unknown status:${status}`);
   }
 };
+
+const modalWindowRender = ({ title, description, link }, domElements) => {
+  const {
+    modalTitle,
+    modalBody,
+    modalFullArticle,
+  } = domElements;
+  modalTitle.textContent = title;
+  modalBody.textContent = description;
+  modalFullArticle.href = link;
+};
+
+const checkedPostsHandler = (checkedPosts, domElements) => {
+  checkedPosts.forEach((post) => {
+    const postLink = document.querySelector(`[data-id = '${post.id}']`);
+    postLink.classList.replace('fw-bold', 'fw-normal');
+    postLink.classList.add('link-secondary');
+    modalWindowRender(post, domElements);
+  });
+};
+
 /* eslint no-param-reassign: 0 */
 const cardBody = (container, name) => {
   container.innerHTML = '';
@@ -86,7 +107,7 @@ const postsRender = (name, domElements, state) => {
   const { posts } = domElements;
   const listContainer = cardBody(posts, name);
   state.postList.forEach((post) => {
-    const { title, link } = post;
+    const { title, link, id } = post;
     const li = document.createElement('li');
     li.classList.add(
       'list-group-item',
@@ -100,11 +121,14 @@ const postsRender = (name, domElements, state) => {
     a.textContent = title;
     a.classList.add('fw-bold');
     a.href = link;
+    a.setAttribute('data-id', id);
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.classList.add('btn', 'btn-outline-primary', 'btn-sm');
     btn.textContent = 'Просмотр';
-
+    btn.setAttribute('data-id', id);
+    btn.setAttribute('data-bs-toggle', 'modal');
+    btn.setAttribute('data-bs-target', '#modal');
     li.append(a);
     li.append(btn);
     listContainer.append(li);
@@ -112,7 +136,6 @@ const postsRender = (name, domElements, state) => {
 };
 
 export default (state, i18nInstance, domElements) => (path, value, prev) => {
-  console.log(state);
   switch (path) {
     case 'rssForm.error': errorHandler(state, i18nInstance, domElements);
       break;
@@ -125,6 +148,8 @@ export default (state, i18nInstance, domElements) => (path, value, prev) => {
     case 'lastFeedId': console.log(`lastFeedId = ${prev}, currentId = ${value}`);
       break;
     case 'lastPostId': console.log(`lastPostdId = ${prev}, currentId = ${value}`);
+      break;
+    case 'checkedPosts': checkedPostsHandler(value, domElements);
       break;
     default:
       throw new Error(`Unknown path of app state: '${path}'!`);
