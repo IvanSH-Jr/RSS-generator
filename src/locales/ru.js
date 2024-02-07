@@ -12,7 +12,6 @@ export default {
     rssForm: {
       inputPlaceholder: 'Ссылка RSS',
       finished: 'RSS успешно загружен',
-      sending: 'Запрос отправляется',
       sent: 'RSS загружается',
       error: {
         invalid: 'Ресурс не содержит валидный RSS',

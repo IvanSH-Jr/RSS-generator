@@ -131,7 +131,6 @@ export default () => {
         const urlShape = urlValidator(state.feeds);
         urlShape.validate({ url })
           .then(() => {
-            state.rssForm.status = 'sending';
             return downloadContent(url);
           })
           .catch((err) => {
