@@ -118,10 +118,6 @@ export default () => {
             state.rssForm.error = null;
             state.rssForm.status = 'filling';
           })
-          .catch((err) => {
-            state.rssForm.error = err.message;
-            state.rssForm.status = 'error';
-          })
           .finally(() => setTimeout(downloadContent, 5000, url));
       };
 
@@ -131,10 +127,10 @@ export default () => {
         const urlShape = urlValidator(state.feeds);
         urlShape.validate({ url })
           .then(() => {
+            state.rssForm.status = 'sending';
             return downloadContent(url);
           })
           .catch((err) => {
-            console.log(err.message);
             state.rssForm.error = err.message;
             state.rssForm.status = 'error';
           });
