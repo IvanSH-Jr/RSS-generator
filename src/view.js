@@ -137,7 +137,7 @@ const postsRender = (name, domElements, state, btnName) => {
   listGroup.replaceChildren(...list);
 };
 
-export default (state, i18nInstance, domElements) => (path, value, prev) => {
+export default (state, i18nInstance, domElements) => (path, value) => {
   switch (path) {
     case 'rssForm.error': errorHandler(state, i18nInstance, domElements);
       break;
