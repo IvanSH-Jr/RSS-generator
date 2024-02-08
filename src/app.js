@@ -80,9 +80,12 @@ export default () => {
         return downLoad
           .then((rssData) => {
             console.log(rssData); // array
-            
-            const content = rssParser(rss.data.contents);
             state.rssForm.status = 'sent';
+            const content = rssData.reduce((acc, rss) => {
+              const parsedRss = rssParser(rss.data.contents);
+              return [...acc, parsedRss];
+            }, []);
+            console.log(content)
             return content;
           })
           .then(({ feed, posts }) => {
