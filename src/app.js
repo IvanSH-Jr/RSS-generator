@@ -66,11 +66,21 @@ export default () => {
         state.checkedPosts.push(...postById);
       };
 
+      const rssRequests = (state) => {
+        return state.feeds.map(({ url }) => {
+          const allOriginUrl = allOrigin(url);
+          const request = axios.get(allOriginUrl);
+          return request;
+        });
+      };
+
       const downloadContent = (url) => {
-        const allOriginUrl = allOrigin(url);
-        const rssData = axios.get(allOriginUrl);
-        return rssData
-          .then((rss) => {
+        const requests = state.feeds.length ? rssRequests(state) : [axios.get(allOrigin(url))];
+        const downLoad = Promise.all([...requests]);
+        return downLoad
+          .then((rssData) => {
+            console.log(rssData); // array
+            
             const content = rssParser(rss.data.contents);
             state.rssForm.status = 'sent';
             return content;
