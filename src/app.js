@@ -66,62 +66,62 @@ export default () => {
         state.checkedPosts.push(...postById);
       };
 
-      const rssRequests = (state) => {
-        return state.feeds.map(({ url }) => {
+      const rssRequests = (state, newUrl) => {
+        // https://habr.com/ru/rss/articles/?fl=ru
+        const isNew = state.feeds.every(({ url }) => url !== newUrl);
+        const newRequest = isNew ? [axios.get(allOrigin(newUrl))] : [];
+        const oldRequests = state.feeds.map(({ url }) => {
           const allOriginUrl = allOrigin(url);
           const request = axios.get(allOriginUrl);
           return request;
         });
+        return [...oldRequests, ...newRequest];
       };
 
       const downloadContent = (url) => {
-        const requests = state.feeds.length ? rssRequests(state) : [axios.get(allOrigin(url))];
+        const requests = state.feeds.length ? rssRequests(state, url) : [axios.get(allOrigin(url))];
         const downLoad = Promise.all([...requests]);
         return downLoad
           .then((rssData) => {
-            console.log(rssData); // array
             state.rssForm.status = 'sent';
             const content = rssData.reduce((acc, rss) => {
               const parsedRss = rssParser(rss.data.contents);
               return [...acc, parsedRss];
             }, []);
-            console.log(content)
             return content;
           })
-          .then(({ feed, posts }) => {
-            const { title, description } = feed;
-            const feedId = state.lastFeedId + 1;
-            const hasFeed = state.feeds.filter((feedItem) => feedItem.title === title);
-            if (hasFeed.length === 0) {
-              state.lastFeedId = feedId;
-              state.feeds.push({
-                id: feedId, title, description, url,
-              });
-            }
-            if (state.postList.length) {
-              const newPost = posts
-                .filter((post) => state.postList.every((item) => item.title !== post.title));
-              newPost.forEach((post) => {
+          .then((contents) => {
+            contents.forEach(({ feed, posts }) => {
+              const { title, description } = feed;
+              const feedId = state.lastFeedId + 1;
+              const hasFeed = state.feeds.filter((feedItem) => feedItem.title === title);
+              if (hasFeed.length === 0) {
+                state.lastFeedId = feedId;
+                state.feeds.push({
+                  id: feedId, title, description, url,
+                });
+              }
+              if (state.postList.length) {
+                const newPost = posts
+                  .filter((post) => state.postList.every((item) => item.title !== post.title));
+                newPost.forEach((post) => {
+                  state.lastPostId += 1;
+                  /* eslint no-param-reassign: 0 */
+                  post.id = state.lastPostId;
+                  /* eslint no-param-reassign: 1 */
+                });
+                state.postList.unshift(...newPost);
+                return;
+              }
+              posts.forEach((post) => {
                 state.lastPostId += 1;
                 /* eslint no-param-reassign: 0 */
                 post.id = state.lastPostId;
                 /* eslint no-param-reassign: 1 */
               });
-              state.postList.unshift(...newPost);
-              domElements.readBtn = document.querySelectorAll('.btn-sm');
-              domElements.readBtn.forEach((readBtn) => {
-                readBtn.addEventListener('click', readBtnHandler);
-              });
-              return;
-            }
-            posts.forEach((post) => {
-              state.lastPostId += 1;
-              /* eslint no-param-reassign: 0 */
-              post.id = state.lastPostId;
-              /* eslint no-param-reassign: 1 */
+              state.postList.push(...posts);
+              state.rssForm.status = 'finished';
             });
-            state.postList.push(...posts);
-            state.rssForm.status = 'finished';
             domElements.readBtn = document.querySelectorAll('.btn-sm');
             domElements.readBtn.forEach((readBtn) => {
               readBtn.addEventListener('click', readBtnHandler);
@@ -141,6 +141,7 @@ export default () => {
         urlShape.validate({ url })
           .then(() => {
             state.rssForm.status = 'sending';
+            console.log(url);
             return downloadContent(url);
           })
           .catch((err) => {
