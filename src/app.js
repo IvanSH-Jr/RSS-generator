@@ -66,11 +66,11 @@ export default () => {
         state.checkedPosts.push(...postById);
       };
 
-      const rssRequests = (state, newUrl) => {
+      const rssRequests = (currentState, newUrl) => {
         // https://habr.com/ru/rss/articles/?fl=ru
-        const isNew = state.feeds.every(({ url }) => url !== newUrl);
+        const isNew = currentState.feeds.every(({ url }) => url !== newUrl);
         const newRequest = isNew ? [axios.get(allOrigin(newUrl))] : [];
-        const oldRequests = state.feeds.map(({ url }) => {
+        const oldRequests = currentState.feeds.map(({ url }) => {
           const allOriginUrl = allOrigin(url);
           const request = axios.get(allOriginUrl);
           return request;
@@ -83,7 +83,6 @@ export default () => {
         const downLoad = Promise.all([...requests]);
         return downLoad
           .then((rssData) => {
-            state.rssForm.status = 'sent';
             const content = rssData.reduce((acc, rss) => {
               const parsedRss = rssParser(rss.data.contents);
               return [...acc, parsedRss];
@@ -127,10 +126,6 @@ export default () => {
               readBtn.addEventListener('click', readBtnHandler);
             });
           })
-          .then(() => {
-            state.rssForm.error = null;
-            state.rssForm.status = 'filling';
-          })
           .finally(() => setTimeout(downloadContent, 5000, url));
       };
 
@@ -140,9 +135,12 @@ export default () => {
         const urlShape = urlValidator(state.feeds);
         urlShape.validate({ url })
           .then(() => {
-            state.rssForm.status = 'sending';
-            console.log(url);
+            state.rssForm.status = 'sending'; // блок кнопки
             return downloadContent(url);
+          })
+          .then(() => {
+            state.rssForm.error = null;
+            state.rssForm.status = 'filling';
           })
           .catch((err) => {
             state.rssForm.error = err.message;

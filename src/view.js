@@ -17,13 +17,9 @@ const formStatusHandler = (state, i18nInstance, domElements, status) => {
     case 'sending':
       sendBtn.setAttribute('disabled', '');
       break;
-    case 'sent':
-      feedback.textContent = i18nInstance.t(`rssForm.${status}`);
-      feedback.classList.replace('loading', 'text-danger');
-      sendBtn.removeAttribute('disabled');
-      break;
-    case 'filling':
     case 'finished':
+    case 'filling':
+      sendBtn.removeAttribute('disabled');
       feedback.textContent = i18nInstance.t('rssForm.finished');
       feedback.classList.replace('text-danger', 'text-success');
       feedback.classList.replace('loading', 'text-success');
@@ -147,8 +143,8 @@ export default (state, i18nInstance, domElements) => (path, value) => {
       break;
     case 'postList': postsRender(i18nInstance.t(path), domElements, state, i18nInstance.t('readBtn'));
       break;
-    case 'lastFeedId': 
-    case 'lastPostId': 
+    case 'lastFeedId':
+    case 'lastPostId':
       break;
     case 'checkedPosts': checkedPostsHandler(value, domElements);
       break;
