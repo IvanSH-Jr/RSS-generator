@@ -1,11 +1,3 @@
-import { setLocale } from 'yup';
-
-setLocale({
-  string: {
-    url: 'errUrl',
-  },
-});
-
 export default {
   translation: {
     appName: 'RSS aggregator',

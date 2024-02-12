@@ -4,8 +4,7 @@ import i18next from 'i18next';
 import axios from 'axios';
 
 import view from './view.js';
-import ru from './locales/ru.js';
-import en from './locales/en.js';
+import resources from './locales/index.js';
 import rssParser from './rssParser.js';
 
 const allOrigin = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
@@ -47,15 +46,17 @@ export default () => {
   i18nInstance.init({
     lng: defaultLanguage,
     debug: false,
-    resources: {
-      ru,
-      en,
-    },
+    resources,
   })
     .then(() => {
       const state = onChange(instanceState, view(instanceState, i18nInstance, domElements));
 
       const urlValidator = (feeds) => {
+        yup.setLocale({
+          string: {
+            url: 'errUrl',
+          },
+        });
         const arrayOfUrls = feeds.map(({ url }) => url);
         return yup.object().shape({ url: yup.string().url().notOneOf(arrayOfUrls, 'duplicate') });
       };
