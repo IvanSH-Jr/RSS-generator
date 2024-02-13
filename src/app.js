@@ -8,15 +8,16 @@ import resources from './locales/index.js';
 import rssParser from './rssParser.js';
 
 const allOrigin = (url) => `https://allorigins.hexlet.app/get?disableCache=true&url=${encodeURIComponent(url)}`;
+const uidGenerator = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
 
 export default () => {
   const defaultLanguage = 'ru';
 
   const instanceState = {
     appLng: defaultLanguage,
+    loadingProcess: 'init',
     rssForm: {
-      status: 'filling', // sending succeed finished failed
-      error: null, // all errors with form
+      error: null,
     },
     feeds: [],
     lastFeedId: 0,
@@ -62,7 +63,7 @@ export default () => {
       };
 
       const readBtnHandler = (btn) => {
-        const postId = Number(btn.currentTarget.dataset.id);
+        const postId = btn.currentTarget.dataset.id;
         const postById = state.postList.filter(({ id }) => id === postId);
         state.checkedPosts.push(...postById);
       };
@@ -93,39 +94,39 @@ export default () => {
           .then((contents) => {
             contents.forEach(({ feed, posts }) => {
               const { title, description } = feed;
-              const feedId = state.lastFeedId + 1;
               const hasFeed = state.feeds.filter((feedItem) => feedItem.title === title);
               if (hasFeed.length === 0) {
-                state.lastFeedId = feedId;
                 state.feeds.push({
-                  id: feedId, title, description, url,
+                  id: uidGenerator(), title, description, url,
                 });
               }
               if (state.postList.length) {
                 const newPost = posts
                   .filter((post) => state.postList.every((item) => item.title !== post.title));
                 newPost.forEach((post) => {
-                  state.lastPostId += 1;
                   /* eslint no-param-reassign: 0 */
-                  post.id = state.lastPostId;
+                  post.id = uidGenerator();
                   /* eslint no-param-reassign: 1 */
                 });
                 state.postList.unshift(...newPost);
+                state.loadingProcess = 'success';
                 return;
               }
               posts.forEach((post) => {
-                state.lastPostId += 1;
                 /* eslint no-param-reassign: 0 */
-                post.id = state.lastPostId;
+                post.id = uidGenerator();
                 /* eslint no-param-reassign: 1 */
               });
               state.postList.push(...posts);
-              state.rssForm.status = 'finished';
+              state.loadingProcess = 'success';
             });
             domElements.readBtn = document.querySelectorAll('.btn-sm');
             domElements.readBtn.forEach((readBtn) => {
               readBtn.addEventListener('click', readBtnHandler);
             });
+          })
+          .catch(() => {
+            state.loadingProcess = 'failed';
           })
           .finally(() => setTimeout(downloadContent, 5000, url));
       };
@@ -136,16 +137,16 @@ export default () => {
         const urlShape = urlValidator(state.feeds);
         urlShape.validate({ url })
           .then(() => {
-            state.rssForm.status = 'sending'; // блок кнопки
+            state.loadingProcess = 'loading'; // блок кнопки
             return downloadContent(url);
           })
           .then(() => {
             state.rssForm.error = null;
-            state.rssForm.status = 'filling';
+            state.loadingProcess = 'init';
           })
           .catch((err) => {
             state.rssForm.error = err.message;
-            state.rssForm.status = 'error';
+            // state.rssForm.status = 'error';
           });
       });
     });

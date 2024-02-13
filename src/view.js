@@ -9,26 +9,26 @@ const errorHandler = (state, i18nInstance, domElements) => {
   }
 };
 
-const formStatusHandler = (state, i18nInstance, domElements, status) => {
+const loadingProcessHandler = (state, i18nInstance, domElements, status) => {
   const {
     feedback, rssInput, sendBtn, rssForm,
   } = domElements;
   switch (status) {
-    case 'sending':
+    case 'loading':
       sendBtn.setAttribute('disabled', '');
       break;
-    case 'finished':
-    case 'filling':
-      sendBtn.removeAttribute('disabled');
-      feedback.textContent = i18nInstance.t('rssForm.finished');
+    case 'success':
+      feedback.textContent = i18nInstance.t(`loadingProcess.${status}`);
       feedback.classList.replace('text-danger', 'text-success');
-      feedback.classList.replace('loading', 'text-success');
       rssInput.classList.remove('is-invalid');
+      break;
+    case 'init':
+      sendBtn.removeAttribute('disabled');
       rssForm.reset();
       rssInput.focus();
       break;
-    case 'error':
-      feedback.textContent = i18nInstance.t(`rssForm.error.${state.rssForm.error}`);
+    case 'failed':
+      feedback.textContent = i18nInstance.t(`loadingProcess.${status}`);
       feedback.classList.replace('loading', 'text-danger');
       feedback.classList.replace('text-success', 'text-danger');
       break;
@@ -137,14 +137,11 @@ export default (state, i18nInstance, domElements) => (path, value) => {
   switch (path) {
     case 'rssForm.error': errorHandler(state, i18nInstance, domElements);
       break;
-    case 'rssForm.status': formStatusHandler(state, i18nInstance, domElements, value);
+    case 'loadingProcess': loadingProcessHandler(state, i18nInstance, domElements, value);
       break;
     case 'feeds': feedsRender(i18nInstance.t(path), domElements, state);
       break;
     case 'postList': postsRender(i18nInstance.t(path), domElements, state, i18nInstance.t('readBtn'));
-      break;
-    case 'lastFeedId':
-    case 'lastPostId':
       break;
     case 'checkedPosts': checkedPostsHandler(value, domElements);
       break;
