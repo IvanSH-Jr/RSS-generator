@@ -109,7 +109,7 @@ export default () => {
                   /* eslint no-param-reassign: 1 */
                 });
                 state.postList.unshift(...newPost);
-                state.loadingProcess = 'success';
+                // state.loadingProcess = 'success';
                 return;
               }
               posts.forEach((post) => {
@@ -146,7 +146,6 @@ export default () => {
           })
           .catch((err) => {
             state.rssForm.error = err.message;
-            // state.rssForm.status = 'error';
           });
       });
     });

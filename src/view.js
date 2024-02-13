@@ -1,6 +1,7 @@
 const errorHandler = (state, i18nInstance, domElements) => {
   const { feedback, rssInput } = domElements;
   const { error } = state.rssForm;
+  console.log(error);
   if (error) {
     const errorText = i18nInstance.t(`rssForm.error.${error}`);
     feedback.textContent = errorText;
