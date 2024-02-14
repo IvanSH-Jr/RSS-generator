@@ -83,16 +83,14 @@ export default () => {
       const downloadContent = (url) => {
         const requests = state.feeds.length ? rssRequests(state, url) : [axios.get(allOrigin(url))];
         const downLoad = Promise.all([...requests]);
-        return downLoad
+        downLoad
           .then((rssData) => {
             const content = rssData.reduce((acc, rss) => {
               const parsedRss = rssParser(rss.data.contents);
               return [...acc, parsedRss];
             }, []);
-            return content;
-          })
-          .then((contents) => {
-            contents.forEach(({ feed, posts }) => {
+
+            content.forEach(({ feed, posts }) => {
               const { title, description } = feed;
               const hasFeed = state.feeds.filter((feedItem) => feedItem.title === title);
               if (hasFeed.length === 0) {
@@ -109,7 +107,6 @@ export default () => {
                   /* eslint no-param-reassign: 1 */
                 });
                 state.postList.unshift(...newPost);
-                // state.loadingProcess = 'success';
                 return;
               }
               posts.forEach((post) => {
@@ -125,8 +122,17 @@ export default () => {
               readBtn.addEventListener('click', readBtnHandler);
             });
           })
-          .catch(() => {
-            state.loadingProcess = 'failed';
+          .catch((err) => {
+            switch (err.message) {
+              case 'invalid':
+                state.rssForm.error = err.message;
+                break;
+              case 'Network Error':
+                state.loadingProcess = 'failed';
+                break;
+              default:
+                throw new Error(err);
+            }
           })
           .finally(() => setTimeout(downloadContent, 5000, url));
       };
@@ -138,7 +144,7 @@ export default () => {
         urlShape.validate({ url })
           .then(() => {
             state.loadingProcess = 'loading'; // блок кнопки
-            return downloadContent(url);
+            downloadContent(url);
           })
           .then(() => {
             state.rssForm.error = null;
