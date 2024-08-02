@@ -1,5 +1,3 @@
-### Hexlet tests and linter status:
-[![Actions Status](https://github.com/IvanSH-Jr/frontend-project-11/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/IvanSH-Jr/frontend-project-11/actions)
 ### GitHubActions status:
 [![makeInstallAndLint](https://github.com/IvanSH-Jr/frontend-project-11/actions/workflows/makeInstallAndLint.yml/badge.svg)](https://github.com/IvanSH-Jr/frontend-project-11/actions/workflows/makeInstallAndLint.yml)
 ### CodeClimate status:
